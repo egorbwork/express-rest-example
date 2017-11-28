@@ -1,8 +1,5 @@
+const productRoutes = require('./product');
 
-/*
- * GET home page.
- */
-
-exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+module.exports = function(app, db) {
+    productRoutes(app, db);
 };
