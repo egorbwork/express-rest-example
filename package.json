@@ -1,12 +1,17 @@
 {
-  "name": "application-name",
+  "name": "express-rest-example",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "dependencies": {
-    "express": "3.5.2",
-    "jade": "*"
+    "express": "^3.5.2",
+    "jade": "*",
+    "mongodb": "^2.2.33"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
   }
 }
