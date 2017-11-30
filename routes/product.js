@@ -71,9 +71,6 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
         let data = req.body;
-        if (!isPartialDataValid(data)) {
-            return res.send(400, {code: 'validation.error', 'error': 'Invalid input!'})
-        }
         db.collection('products').findOne(
             details,
             (err, item) => {
@@ -82,6 +79,9 @@ module.exports = function(app, db) {
                 } else {
                     for (let field of Object.getOwnPropertyNames(data)) {
                         item[field] = data[field];
+                    }
+                    if (!isValidProduct(item)) {
+                        return res.send(400, {code: 'validation.error', 'error': 'Invalid input!'})
                     }
                     db.collection('products').updateOne(details, item, (err, result) => {
                         if (err) {
@@ -104,22 +104,6 @@ let isValidProduct = function (product) {
         return false;
     }
     if (!product.description || typeof product.description !== 'string' || product.description.length < 0) {
-        return false;
-    }
-    return true;
-};
-
-let isPartialDataValid = function (data) {
-    if (!data.name && !data.price && !data.description) {
-        return false;
-    }
-    if (data.name && (typeof data.name !== 'string' || data.name.length < 3)) {
-        return false;
-    }
-    if (data.price && (!Number.isFinite(data.price) || data.price <= 0)) {
-        return false;
-    }
-    if (data.description && (typeof data.description !== 'string' || data.description.length < 0)) {
         return false;
     }
     return true;
