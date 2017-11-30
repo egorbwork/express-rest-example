@@ -6,9 +6,9 @@ module.exports = function(app, db) {
         db.collection('products').find().toArray(
             (err, items) => {
                 if (err) {
-                    res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                    res.status(500).json({code: 'db.error', 'error': 'An error has occurred'});
                 } else {
-                    res.send(items);
+                    res.status(200).json({items, total: items.length});
                 }
             }
         );
@@ -20,9 +20,9 @@ module.exports = function(app, db) {
             details,
             (err, item) => {
                 if (err) {
-                    res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                    res.json(500, {code: 'db.error', 'error': 'An error has occurred'});
                 } else {
-                    res.send(item);
+                    res.json(200, item);
                 }
             }
         );
@@ -30,13 +30,13 @@ module.exports = function(app, db) {
     app.post('/products', [authorization, (req, res) => {
         let product = req.body;
         if (!isValidProduct(product)) {
-            return res.send(400, {code: 'validation.error', 'error': 'Invalid input!'})
+            return res.json(400, {code: 'validation.error', 'error': 'Invalid input!'})
         }
         db.collection('products').insertOne(product, (err, result) => {
             if (err) {
-                res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                res.json(500, {code: 'db.error', 'error': 'An error has occurred'});
             } else {
-                res.send(result.ops[0]);
+                res.json(200, result.ops[0]);
             }
         });
     }]);
@@ -45,9 +45,9 @@ module.exports = function(app, db) {
         const details = { '_id': new ObjectID(id) };
         db.collection('products').deleteOne(details, (err, item) => {
             if (err) {
-                res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                res.json(500, {code: 'db.error', 'error': 'An error has occurred'});
             } else {
-                res.send({message: 'product with id: ' + id + ' deleted!'});
+                res.json(200, {message: 'product with id: ' + id + ' deleted!'});
             }
         });
     });
@@ -56,14 +56,15 @@ module.exports = function(app, db) {
         const details = { '_id': new ObjectID(id) };
         let product = req.body;
         if (!isValidProduct(product)) {
-            return res.send(400, {code: 'validation.error', 'error': 'Invalid input!'})
+            return res.json(400, {code: 'validation.error', 'error': 'Invalid input!'})
         }
+        delete product._id;
         db.collection('products').updateOne(details, product, (err, result) => {
             if (err) {
-                res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                res.json(500, {code: 'db.error', 'error': 'An error has occurred'});
             } else {
                 product._id = id;
-                res.send(product);
+                res.json(200, product);
             }
         });
     });
@@ -71,23 +72,24 @@ module.exports = function(app, db) {
         const id = req.params.id;
         const details = { '_id': new ObjectID(id) };
         let data = req.body;
+        delete data._id;
         db.collection('products').findOne(
             details,
             (err, item) => {
                 if (err) {
-                    res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                    res.json(500, {code: 'db.error', 'error': 'An error has occurred'});
                 } else {
                     for (let field of Object.getOwnPropertyNames(data)) {
                         item[field] = data[field];
                     }
                     if (!isValidProduct(item)) {
-                        return res.send(400, {code: 'validation.error', 'error': 'Invalid input!'})
+                        return res.json(400, {code: 'validation.error', 'error': 'Invalid input!'})
                     }
                     db.collection('products').updateOne(details, item, (err, result) => {
                         if (err) {
-                            res.send(500, {code: 'db.error', 'error': 'An error has occurred'});
+                            res.json(500, {code: 'db.error', 'error': 'An error has occurred'});
                         } else {
-                            res.send(item);
+                            res.json(200, item);
                         }
                     });
                 }
